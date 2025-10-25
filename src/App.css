@@ -1,0 +1,310 @@
+:root{
+  --bg:#0f172a;
+  --surface:#111827;
+  --border:#1f2937;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --accent:#3b82f6;
+  --danger:#ef4444;
+  --success:#10b981;
+  --warning:#f59e0b;
+  
+  /* Parámetros del tablero */
+  --board-max-width: 1400px;
+  --board-padding: 24px;
+  --column-gap: 20px;
+  --column-min-width: 320px;
+  --column-padding: 16px;
+}
+
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--text); font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; display:block}
+
+.app{
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: var(--board-padding) 16px;
+}
+header{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:24px; flex-wrap:wrap}
+h1{font-size:24px; margin:0; font-weight:600}
+
+.new-task{display:flex; gap:8px; min-width:280px}
+.new-task input{background:var(--surface); border:1px solid var(--border); color:var(--text); padding:10px 12px; border-radius:8px; flex:1; font-size:14px}
+.new-task input:focus{outline:none; border-color:var(--accent)}
+.new-task button{background:var(--accent); color:white; border:none; padding:10px 16px; border-radius:8px; cursor:pointer; font-weight:500; transition:background 0.2s}
+.new-task button:hover{background:#2563eb}
+
+.board{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(var(--column-min-width), 1fr));
+  gap: var(--column-gap);
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.column{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: var(--column-padding);
+  min-height: 400px;
+  transition: all 0.2s ease;
+  flex: 1;
+}
+.column.drag-over{border-color:var(--accent); background:#0f1629; box-shadow:0 0 0 2px rgba(59, 130, 246, 0.1)}
+.column h2{font-size:18px; margin:0 0 16px; color:var(--text); font-weight:600; text-align:center}
+.cards{display:flex; flex-direction:column; gap:12px}
+
+.card{background:#0b1220; border:1px solid var(--border); border-radius:10px; padding:12px; display:flex; flex-direction:column; align-items:stretch; gap:12px; cursor:grab; transition:all 0.2s ease; position:relative; min-height:88px}
+.card:hover{border-color:#374151; transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.card:active{cursor:grabbing}
+.card.dragging{opacity:0.5; transform:rotate(2deg); z-index:1000}
+
+.card-title{font-size:14px; line-height:1.4; word-break:break-word}
+.card-desc{font-size:12px; color:var(--muted); line-height:1.5}
+.card-footer{display:flex; flex-direction:column; gap:6px; margin-top:auto}
+.card-btn{font-size:12px; font-weight:600; background:#1f2937; color:var(--text); border:1px solid var(--border); padding:6px 10px; border-radius:6px; cursor:pointer; transition:all 0.2s; width:100%; text-align:center}
+.card-btn:hover{border-color:#374151; background:#374151}
+.card-btn.primary{background:var(--accent); color:#fff; border:none}
+.card-btn.primary:hover{background:#2563eb}
+.card-btn.danger{background:#2d1b1b; color:#fecaca; border-color:#3b2f2f}
+.card-btn.danger:hover{background:#3b2f2f; border-color:#4b3535}
+
+.empty{font-size:13px; color:var(--muted); text-align:center; padding:20px; font-style:italic}
+
+footer{color:var(--muted); text-align:center; font-size:13px}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  :root {
+    --board-padding: 16px;
+    --column-gap: 12px;
+    --column-min-width: 280px;
+    --column-padding: 12px;
+  }
+  
+  .app {
+    padding: var(--board-padding) 12px;
+  }
+  
+  header{flex-direction:column; align-items:stretch; gap:12px}
+  h1{text-align:center; font-size:20px}
+  .new-task{min-width:auto}
+  
+  .board{
+    grid-template-columns: repeat(3, minmax(var(--column-min-width), 1fr));
+    gap: var(--column-gap);
+  }
+  
+  .column{
+    padding: var(--column-padding);
+    min-height: 300px;
+  }
+  
+  .column h2{font-size:16px}
+  .card{padding:12px}
+  .card-title{font-size:14px}
+  .card-actions{flex-direction:column; gap:8px}
+  .card-actions button{width:100%; font-size:12px; padding:6px 12px}
+}
+
+@media (max-width: 480px) {
+  :root {
+    --board-padding: 12px;
+    --column-gap: 8px;
+    --column-min-width: 240px;
+    --column-padding: 8px;
+  }
+  
+  .app {
+    padding: var(--board-padding) 8px;
+  }
+  
+  .board{
+    gap: var(--column-gap);
+  }
+  
+  .column{
+    padding: var(--column-padding);
+    min-height: 250px;
+  }
+  
+  .column h2{font-size:12px}
+  .card{padding:8px}
+  .card-title{font-size:11px}
+  .card-actions{flex-direction:row; gap:4px}
+  .card-actions button{width:auto; font-size:9px; padding:2px 4px}
+}
+
+/* Animaciones para drag & drop */
+@keyframes dragHint {
+  0%, 100% { transform: translateY(0) }
+  50% { transform: translateY(-2px) }
+}
+
+.card:hover:not(.dragging) {
+  animation: dragHint 2s ease-in-out infinite;
+}
+
+/* Estados de carga y transiciones */
+.column:empty .cards::after {
+  content: "Arrastra una tarjeta aquí";
+  display: block;
+  text-align: center;
+  color: var(--muted);
+  font-style: italic;
+  padding: 40px 20px;
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.drag-over .empty {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:1000}
+.modal{background:var(--surface); border:1px solid var(--border); border-radius:12px; width:90%; max-width:560px; box-shadow:0 10px 30px rgba(0,0,0,0.3)}
+.modal-header{padding:16px 20px; border-bottom:1px solid var(--border)}
+.modal-header h3{margin:0; font-size:18px}
+.modal-body{display:flex; flex-direction:column; gap:12px; padding:16px 20px}
+.modal-body label{display:flex; flex-direction:column; gap:6px; font-size:13px; color:var(--muted)}
+.modal-body input, .modal-body textarea{background:#0b1220; border:1px solid var(--border); color:var(--text); border-radius:8px; padding:10px 12px; font-size:14px}
+.modal-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:8px}
+
+.btn{background:#1f2937; color:var(--text); border:1px solid var(--border); padding:10px 14px; border-radius:8px; cursor:pointer}
+.btn:hover{background:#374151; border-color:#374151}
+.btn.btn-primary{background:var(--accent); color:#fff; border:none}
+.btn.btn-primary:hover{background:#2563eb}
+.board{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(var(--column-min-width), 1fr));
+  gap: var(--column-gap);
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.column{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: var(--column-padding);
+  min-height: 400px;
+  transition: all 0.2s ease;
+  flex: 1;
+}
+.column.drag-over{border-color:var(--accent); background:#0f1629; box-shadow:0 0 0 2px rgba(59, 130, 246, 0.1)}
+.column h2{font-size:18px; margin:0 0 16px; color:var(--text); font-weight:600}
+.cards{display:flex; flex-direction:column; gap:12px}
+
+.card{background:#0b1220; border:1px solid var(--border); border-radius:10px; padding:12px; display:flex; flex-direction:column; align-items:stretch; gap:12px; cursor:grab; transition:all 0.2s ease; position:relative; min-height:88px}
+.card:hover{border-color:#374151; transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.card:active{cursor:grabbing}
+.card.dragging{opacity:0.5; transform:rotate(2deg); z-index:1000}
+
+.card-title{font-size:14px; line-height:1.4; word-break:break-word}
+.card-desc{font-size:12px; color:var(--muted); line-height:1.5}
+.card-footer{display:flex; justify-content:flex-end; gap:8px; margin-top:auto}
+.icon-btn{font-size:14px; background:#1f2937; color:var(--text); border:1px solid var(--border); padding:6px; border-radius:8px; cursor:pointer; transition:all 0.2s; width:32px; height:32px; display:flex; align-items:center; justify-content:center; position:relative}
+.icon-btn:hover{border-color:#374151; background:#374151}
+.icon-btn.danger{background:#2d1b1b; color:#fecaca; border-color:#3b2f2f}
+.icon-btn.danger:hover{background:#3b2f2f; border-color:#4b3535}
+/* Tooltip */
+.icon-btn[data-tooltip]::after{content:attr(data-tooltip); position:absolute; bottom:110%; left:50%; transform:translateX(-50%); background:#111827; color:#e5e7eb; border:1px solid #1f2937; border-radius:6px; padding:6px 8px; font-size:12px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s ease}
+.icon-btn:hover::after{opacity:1}
+
+.empty{font-size:13px; color:var(--muted); text-align:center; padding:20px; font-style:italic}
+
+footer{color:var(--muted); text-align:center; font-size:13px}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  :root {
+    --board-padding: 16px;
+    --column-gap: 12px;
+    --column-min-width: 280px;
+    --column-padding: 12px;
+  }
+  
+  .app {
+    padding: var(--board-padding) 12px;
+  }
+  
+  header{flex-direction:column; align-items:stretch; gap:12px}
+  h1{text-align:center; font-size:20px}
+  .new-task{min-width:auto}
+  
+  .board{
+    grid-template-columns: repeat(3, minmax(var(--column-min-width), 1fr));
+    gap: var(--column-gap);
+  }
+  
+  .column{
+    padding: var(--column-padding);
+    min-height: 300px;
+  }
+  
+  .column h2{font-size:16px}
+  .card{padding:12px}
+  .card-title{font-size:14px}
+  .card-actions{flex-direction:column; gap:8px}
+  .card-actions button{width:100%; font-size:12px; padding:6px 12px}
+}
+
+@media (max-width: 480px) {
+  :root {
+    --board-padding: 12px;
+    --column-gap: 8px;
+    --column-min-width: 240px;
+    --column-padding: 8px;
+  }
+  
+  .app {
+    padding: var(--board-padding) 8px;
+  }
+  
+  .board{
+    gap: var(--column-gap);
+  }
+  
+  .column{
+    padding: var(--column-padding);
+    min-height: 250px;
+  }
+  
+  .column h2{font-size:12px}
+  .card{padding:8px}
+  .card-title{font-size:11px}
+  .card-actions{flex-direction:row; gap:4px}
+  .card-actions button{width:auto; font-size:9px; padding:2px 4px}
+}
+
+/* Animaciones para drag & drop */
+@keyframes dragHint {
+  0%, 100% { transform: translateY(0) }
+  50% { transform: translateY(-2px) }
+}
+
+.card:hover:not(.dragging) {
+  animation: dragHint 2s ease-in-out infinite;
+}
+
+/* Estados de carga y transiciones */
+.column:empty .cards::after {
+  content: "Arrastra una tarjeta aquí";
+  display: block;
+  text-align: center;
+  color: var(--muted);
+  font-style: italic;
+  padding: 40px 20px;
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.drag-over .empty {
+  color: var(--accent);
+  font-weight: 500;
+}
