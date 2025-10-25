@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Card from './Card'
 
-const Column = ({ name, title, cards, onMove, onRemove }) => {
+const Column = ({ name, title, cards, onMove, onRemove, onScheduleTimer, onCancelTimer }) => {
   const [isDragOver, setIsDragOver] = useState(false)
 
   const handleDragOver = (e) => {
@@ -55,6 +55,8 @@ const Column = ({ name, title, cards, onMove, onRemove }) => {
             columnName={name}
             onMove={onMove}
             onRemove={onRemove}
+            onScheduleTimer={onScheduleTimer}
+            onCancelTimer={onCancelTimer}
           />
         ))}
       </div>
